@@ -14,7 +14,7 @@ to access to Orion Context Broker:
 (published June 2014).
 
 Thanks to Alejandro Villamarin (published around October 2013):
-
+```java
        import com.sun.jersey.api.client.Client;
        import com.sun.jersey.api.client.ClientResponse;
        import com.sun.jersey.api.client.WebResource;
@@ -50,13 +50,13 @@ Thanks to Alejandro Villamarin (published around October 2013):
        catch (Exception e) {
           System.err.println("Failed. Reason is " + e.getMessage());
        }
-
+```
 ## JavaScript
 
 Using JQuery AJAX, thanks to Marco Vereda Manchego ([original
 post](http://marcovereda.blogspot.com.es/2013/10/code-snippet-for-custom-http-post.html))
 (published around October 2013):
-
+```javascript
      function capture_sensor_data(){  
      var contentTypeRequest = $.ajax({  
           url: 'http://orion.lab.fiware.org:1026/v1/queryContext',  
@@ -104,12 +104,12 @@ post](http://marcovereda.blogspot.com.es/2013/10/code-snippet-for-custom-http-po
           });  
           contentTypeRequest.always(function(jqXHR, textStatus){       });  
      }
-
+```
 ## Arduino
 
 Thanks to Enrique Hernandez Zurita, using Orion 0.11.0 and 0.12.0
 (published around June 2014):
-
+```c
     #include <SPI.h>
     #include <WiFi.h>
     #include <WString.h>
@@ -202,3 +202,65 @@ Thanks to Enrique Hernandez Zurita, using Orion 0.11.0 and 0.12.0
         return val.toInt();
         }else{return i;}
     }
+```
+
+## PHP 
+
+Open source PHP library created by @leonancarvalho support v1 and v2 API calls.
+More examples can also be viewed at [Library](https://github.com/VM9/orion-explorer-php-frame-work) repository or an [Implementation](https://github.com/VM9/fiware-orion-explorer) repository
+
+```php
+<?php
+include './autoloader.php'; //Using composer
+$ip = "130.206.82.115";
+$orion = new Orion\NGSIAPIv1($ip);
+try{
+    /**
+     * Entity Creation
+     * Ref: https://fiware-orion.readthedocs.io/en/develop/user/walkthrough_apiv1/index.html#entity-creation
+     */
+    echo "<h3>Request: </h3>", PHP_EOL;
+    echo "<pre>";
+    $Create = new \Orion\Operations\updateContext();
+    $contextResponses = $Create->addElement("Room1", "Room", false)
+            ->addAttrinbute("temperature", "float", "23")
+            ->addAttrinbute("pressure", "integer", "720")
+            ->setAction("APPEND")
+            ->send($orion); //To send it you must give the orion connection as parameter
+//            $SECONDUPDATE->send($orion2);//You also can work with 2 connections using this way, sending same entity to 2 different instances
+    
+    $Create->getRequest()->prettyPrint();//The contextElements sent to orion context broker in json format
+    echo "</pre>";
+    echo "<h3>Response: </h3>", PHP_EOL;
+    echo "<pre>";
+    $contextResponses->prettyPrint();
+    echo "</pre>";
+    
+/**
+     * Query Context operation
+     * Ref: https://fiware-orion.readthedocs.io/en/develop/user/walkthrough_apiv1/index.html#query-context-operation
+     */
+echo "<h2>Basic</h2>";
+    echo "<h3>Request : </h3>", PHP_EOL;
+    echo "<pre>";
+    $queryContext = new Orion\Operations\queryContext();
+    $queryResponse = $queryContext->addElement("Room1", "Room")
+            ->send($orion);
+    $responseData = $queryResponse->get();
+
+
+    $queryContext->getRequest()->prettyPrint();
+    echo "</pre>";
+    echo "<h3>Response: </h3>", PHP_EOL;
+    echo "<pre>";
+    $queryResponse->prettyPrint();
+    echo "</pre>";
+}catch (\Exception $e) {
+    echo "<h1>", get_class($e), "</h1><h3>", $e->getMessage(), "</h3>";
+    echo $e->getFile(), " [", $e->getLine(), "]<br>";
+    echo "<pre>", $e->getTraceAsString(), "</pre>";
+    if(method_exists($e, "getResponse")){
+       echo "<pre>Orion Response:",PHP_EOL , $e->getResponse(),"</pre>";
+    }
+}
+```
